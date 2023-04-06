@@ -1,18 +1,24 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
-  </div>
+    <div class="home-container">
+        <SmartHomeCard />
+    </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
+import SmartHomeCard from "@/components/SmartHomeCard.vue";
 
 export default {
-  name: "Home",
-  components: {
-    HelloWorld,
-  },
+    name: "Home",
+    components: {
+        SmartHomeCard,
+    },
 };
 </script>
+<style>
+.home-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+</style>
