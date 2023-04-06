@@ -9,7 +9,7 @@
                 }"
                 @click="selectedTab = 'practice'"
             >
-                Need Practice
+                Practice Card
             </div>
             <div
                 class="homeCard__tabs__tab"
@@ -18,9 +18,10 @@
                 }"
                 @click="selectedTab = 'all'"
             >
-                All Card
+                All Cards
             </div>
         </div>
+        <router-view></router-view>
     </div>
 </template>
 
@@ -50,6 +51,8 @@ export default {
         margin-top: 20px;
         cursor: pointer;
         transition: 0.3s;
+        user-select: none;
+        color: #2E4F4F;
         &:hover {
             font-size: 3.5rem;
         }
@@ -68,6 +71,7 @@ export default {
             opacity: 0.5;
             cursor: pointer;
             transition: 0.3s;
+            user-select: none;
             &:hover {
                 opacity: 0.7;
             }
