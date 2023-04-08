@@ -5,9 +5,14 @@
 
 <script>
 import SVGLogo from "@/components/SVG/logo.vue";
+import { useStore } from "vuex";
 export default {
     components: {
         SVGLogo,
+    },
+    setup() {
+        const store = useStore();
+        store.commit("UPDATE_ALLCARDS", JSON.parse(localStorage.getItem("cards")));
     },
 };
 </script>
@@ -35,7 +40,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    max-width: 700px;
+    width: 700px;
     height: 100%;
     background-color: #2e4f4f;
     color: #2c3e50;
@@ -43,7 +48,7 @@ body {
     @media (max-width: 700px) {
         padding-top: 60px;
         width: 100%;
-        max-width: 100%;
+        width: 100%;
     }
     .logo {
         width: 40%;

@@ -3,13 +3,13 @@ import SmartCard from "@/components/SmartCard.vue";
 
 const routes = [
     {
-        path: ':cardId',
-        name: 'practiceCard',
+        path: ":cardId",
+        name: "practiceCard",
         component: SmartCard,
     },
     {
-        path: 'cardlist',
-        name: 'cardlist',
+        path: "cardlist",
+        name: "cardlist",
         component: SmartCardsList,
     },
 ];

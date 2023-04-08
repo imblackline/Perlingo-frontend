@@ -5,18 +5,18 @@
             <div
                 class="homeCard__tabs__tab"
                 :class="{
-                    'homeCard__tabs__tab--active': selectedTab === 'practice',
+                    'homeCard__tabs__tab--active': $route.name !== 'cardlist',
                 }"
-                @click="selectedTab = 'practice'"
+                @click="showRandomCard"
             >
                 Practice Card
             </div>
             <div
                 class="homeCard__tabs__tab"
                 :class="{
-                    'homeCard__tabs__tab--active': selectedTab === 'all',
+                    'homeCard__tabs__tab--active': $route.name === 'cardlist',
                 }"
-                @click="selectedTab = 'all'"
+                @click="gotoAllCards"
             >
                 All Cards
             </div>
@@ -27,21 +27,62 @@
 
 <script>
 import { ref } from "@vue/reactivity";
+import axios from "axios";
+import { useStore } from "vuex";
+import { useRouter, useRoute } from "vue-router";
+import { nextTick, onBeforeMount, onMounted } from "@vue/runtime-core";
 export default {
     name: "SmartHomeCard",
     setup() {
-        const selectedTab = ref("practice");
+        const router = useRouter();
+        const route = useRoute();
+        const store = useStore();
 
-        return { selectedTab };
+        const selectedTab = ref("practice");
+        onBeforeMount(() => {
+            if (route.fullPath === "/") {
+                router.push("/cardlist");
+                nextTick(() => {
+                    router.push("/cardlist");
+                });
+            }
+        });
+        onMounted(() => {
+            axios
+                .get(`${store.state.BASE_URL}/cards`)
+                .then((res) => {
+                    console.log(res);
+                    store.commit("UPDATE_ALLCARDS", res.data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        });
+        const showRandomCard = () => {
+            router.push("/12314");
+            selectedTab.value = "practice";
+        };
+        const gotoAllCards = () => {
+            router.push("/cardlist");
+            selectedTab.value = "all";
+        };
+        return { selectedTab, showRandomCard, gotoAllCards };
     },
 };
 </script>
 
 <style scoped lang="scss">
 .homeCard__container {
-    width: 80%;
+    width: 70%;
     height: 100%;
-    // background-color: lightslategrey;
+    padding-bottom: 105px;
+    overflow-x: auto;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
     .homeCard__addbutton {
         width: 100%;
         border-radius: 15px;
@@ -52,7 +93,7 @@ export default {
         cursor: pointer;
         transition: 0.3s;
         user-select: none;
-        color: #2E4F4F;
+        color: #2e4f4f;
         &:hover {
             font-size: 3.5rem;
         }
