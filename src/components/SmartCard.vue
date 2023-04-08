@@ -1,6 +1,9 @@
 <template>
     <div class="container">
         <div class="card" @click="showTranslation = !showTranslation">
+            <div class="card__blur" @click.stop v-show="isLoadingPass">
+                <SVGLoading class="card__blur__loading" />
+            </div>
             <div class="card__text">
                 {{
                     showedCard?.text
@@ -19,7 +22,7 @@
                 {{ showedCard?.translation }}
             </div>
             <div class="card__buttons">
-                <div class="card__buttons__button" @click.stop>
+                <div class="card__buttons__button" @click.stop="againCard">
                     Again
                     <span
                         class="material-icons-round card__buttons__button__icon"
@@ -83,19 +86,23 @@
 
 <script>
 import SVGDrop from "@/components/SVG/drop.vue";
+import SVGLoading from "@/components/SVG/loading.vue";
 import { ref } from "@vue/reactivity";
 import { computed } from "@vue/runtime-core";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import axios from "axios";
+import router from "../router";
+
 export default {
-    components: { SVGDrop },
+    components: { SVGDrop, SVGLoading },
     setup() {
         const route = useRoute();
         const store = useStore();
 
         const showTranslation = ref(false);
         const showDetail = ref(false);
+        const isLoadingPass = ref(false);
         const getCardById = (id) => {
             axios
                 .get(`${store.state.BASE_URL}/cards/${id}`)
@@ -107,6 +114,11 @@ export default {
                     console.log(err);
                 });
         };
+        const needPracticeCards = computed(() =>
+            store.state.Allcards.filter(
+                (card) => card.status === "need Practice",
+            ),
+        );
         const showedCard = computed(() => {
             if (
                 store.state.Allcards &&
@@ -122,22 +134,76 @@ export default {
             }
         });
         const passCard = () => {
+            isLoadingPass.value = true;
             axios
-                .patch(`${store.state.BASE_URL}/cards/${showedCard.value._id}`, [
-                    {
-                        propName: "status",
-                        value: "readed",
-                    },
-                ])
+                .patch(
+                    `${store.state.BASE_URL}/cards/${showedCard.value._id}`,
+                    [
+                        {
+                            propName: "status",
+                            value: "readed",
+                        },
+                    ],
+                )
                 .then((res) => {
-                    // console.log(res);
-                    return res;
+                    store.state.Allcards.find(
+                        (card) => card._id === res.data._id,
+                    ).status = "readed";
+                    router.push(
+                        `/${
+                            needPracticeCards.value[
+                                Math.floor(
+                                    Math.random() *
+                                        needPracticeCards.value.length,
+                                )
+                            ]._id
+                        }`,
+                    );
+                    isLoadingPass.value = false;
                 })
                 .catch((err) => {
+                    isLoadingPass.value = false;
                     console.log(err);
                 });
         };
-        return { showTranslation, showDetail, showedCard, passCard };
+        const againCard = () => {
+            isLoadingPass.value = true;
+            axios
+                .patch(
+                    `${store.state.BASE_URL}/cards/${showedCard.value._id}`,
+                    [
+                        {
+                            propName: "status",
+                            value: "need Practice",
+                        },
+                    ],
+                )
+                .then((res) => {
+                    router.push(
+                        `/${
+                            needPracticeCards.value[
+                                Math.floor(
+                                    Math.random() *
+                                        needPracticeCards.value.length,
+                                )
+                            ]._id
+                        }`,
+                    );
+                    isLoadingPass.value = false;
+                })
+                .catch((err) => {
+                    isLoadingPass.value = false;
+                    console.log(err);
+                });
+        };
+        return {
+            showTranslation,
+            showDetail,
+            showedCard,
+            passCard,
+            isLoadingPass,
+            againCard,
+        };
     },
 };
 </script>
@@ -158,6 +224,21 @@ export default {
         cursor: pointer;
         box-shadow: 0px 0px 21px 6px rgba(44, 51, 51, 0.25);
         position: relative;
+        &__blur {
+            position: absolute;
+            width: 99%;
+            height: 99%;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            // filter: blur(5px);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+            &__loading {
+                z-index: 2;
+            }
+        }
         &__text {
             font-size: 2.5rem;
             color: white;
@@ -283,7 +364,7 @@ export default {
                 background-color: #2e4f4f;
                 user-select: none;
                 padding: 1px 15px;
-                font-size: 0.9rem;
+                font-size: 1rem;
                 border-radius: 50px;
                 color: #88a47c;
                 margin-bottom: 10px;
@@ -294,6 +375,7 @@ export default {
                 padding-bottom: 10px;
                 margin-bottom: 10px;
                 width: 100%;
+                font-size: 1.2rem;
                 &:last-of-type {
                     border: none;
                 }

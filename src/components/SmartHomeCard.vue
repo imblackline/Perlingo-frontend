@@ -19,7 +19,12 @@
                 @click.stop
                 v-model="newLinkWord"
             />
-            <p class="homeCard__addbutton__icon">+</p>
+            <p
+                class="homeCard__addbutton__icon"
+                @click="showSearchBar ? addNewCar() : undefined"
+            >
+                +
+            </p>
         </button>
         <div class="homeCard__tabs">
             <div
@@ -80,7 +85,7 @@ export default {
                 });
             }
         });
-        onMounted(() => {
+        const getAllCards = () => {
             axios
                 .get(`${store.state.BASE_URL}/cards`)
                 .then((res) => {
@@ -90,6 +95,9 @@ export default {
                 .catch((err) => {
                     console.log(err);
                 });
+        };
+        onMounted(() => {
+            getAllCards();
         });
         const needPracticeCards = computed(() =>
             store.state.Allcards.filter(
@@ -120,6 +128,28 @@ export default {
             const text = await navigator.clipboard.readText();
             newLinkWord.value = text;
         }
+        const addNewCar = () => {
+            let newWord = undefined;
+            if (newLinkWord.value.includes("https://translate.google.com/")) {
+                newWord = newLinkWord.value.split("&text=")[1].split("&")[0];
+            } else {
+                newWord = newLinkWord.value;
+            }
+            console.log("new word", newWord);
+            axios
+                .post(`${store.state.BASE_URL}/cards`, {
+                    text: newWord,
+                    difficulty: "easy",
+                })
+                .then((res) => {
+                    getAllCards();
+                    newLinkWord.value = undefined;
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            // console.log("newcar", newLinkWord);
+        };
         return {
             selectedTab,
             showRandomCard,
@@ -128,7 +158,8 @@ export default {
             hideSearchBar,
             newLinkWord,
             pasteClipboard,
-            needPracticeCards
+            needPracticeCards,
+            addNewCar,
         };
     },
 };
