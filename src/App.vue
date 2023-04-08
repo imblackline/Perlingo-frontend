@@ -12,7 +12,10 @@ export default {
     },
     setup() {
         const store = useStore();
-        store.commit("UPDATE_ALLCARDS", JSON.parse(localStorage.getItem("cards")));
+        store.commit(
+            "UPDATE_ALLCARDS",
+            JSON.parse(localStorage.getItem("cards")),
+        );
     },
 };
 </script>
@@ -48,10 +51,15 @@ body {
     @media (max-width: 700px) {
         padding-top: 60px;
         width: 100%;
-        width: 100%;
     }
     .logo {
         width: 40%;
+        @media (max-width: 700px) {
+                width: 50%;
+        }
+        @media (max-width: 500px) {
+                width: 65%;
+        }
     }
 }
 

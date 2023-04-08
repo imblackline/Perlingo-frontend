@@ -129,26 +129,32 @@ export default {
             newLinkWord.value = text;
         }
         const addNewCar = () => {
-            let newWord = undefined;
-            if (newLinkWord.value.includes("https://translate.google.com/")) {
-                newWord = newLinkWord.value.split("&text=")[1].split("&")[0];
-            } else {
-                newWord = newLinkWord.value;
+            if (newLinkWord.value) {
+                let newWord = undefined;
+                if (
+                    newLinkWord.value.includes("https://translate.google.com/")
+                ) {
+                    newWord = newLinkWord.value
+                        .split("&text=")[1]
+                        .split("&")[0];
+                } else {
+                    newWord = newLinkWord.value;
+                }
+                console.log("new word", newWord);
+                axios
+                    .post(`${store.state.BASE_URL}/cards`, {
+                        text: newWord,
+                        difficulty: "easy",
+                    })
+                    .then((res) => {
+                        getAllCards();
+                        newLinkWord.value = undefined;
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+                // console.log("newcar", newLinkWord);
             }
-            console.log("new word", newWord);
-            axios
-                .post(`${store.state.BASE_URL}/cards`, {
-                    text: newWord,
-                    difficulty: "easy",
-                })
-                .then((res) => {
-                    getAllCards();
-                    newLinkWord.value = undefined;
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-            // console.log("newcar", newLinkWord);
         };
         return {
             selectedTab,
@@ -173,6 +179,15 @@ export default {
     overflow-x: auto;
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+    @media (max-width: 700px) {
+        width: 75%;
+    }
+    @media (max-width: 550px) {
+        width: 85%;
+    }
+    @media (max-width: 450px) {
+        width: 90%;
+    }
     &::-webkit-scrollbar {
         display: none;
     }
@@ -194,6 +209,7 @@ export default {
         position: relative;
 
         // position: relative;
+
         &:hover {
             font-size: 3.5rem;
         }
@@ -221,7 +237,6 @@ export default {
         }
         &--showInput {
             padding: 20px 13px;
-
             .homeCard__addbutton__input {
                 width: 85%;
                 border-radius: 7px;
@@ -240,6 +255,16 @@ export default {
                 opacity: 1;
                 visibility: visible;
             }
+            @media (max-width: 650px) {
+                .homeCard__addbutton__input {
+                    width: 80%;
+                }
+            }
+            @media (max-width: 450px) {
+                .homeCard__addbutton__input {
+                    width: 75%;
+                }
+            }
         }
     }
     .homeCard__tabs {
@@ -257,6 +282,9 @@ export default {
             cursor: pointer;
             transition: 0.3s;
             user-select: none;
+            @media (max-width: 500px) {
+                font-size: 1.1rem;
+            }
             &:hover {
                 opacity: 0.7;
             }

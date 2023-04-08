@@ -280,6 +280,10 @@ export default {
                 font-size: 1.3rem;
                 transition: 0.3s;
                 user-select: none;
+                @media (max-width: 500px) {
+                    padding: 7px 40px;
+                    font-size: 1.1rem;
+                }
                 &__icon {
                     margin-left: 10px;
                 }
@@ -295,6 +299,21 @@ export default {
             top: 98.5%;
             transition: 0.5s;
             width: 95%;
+            @media (max-width: 600px) {
+                top: 98%;
+            }
+            @media (max-width: 510px) {
+                top: 97%;
+            }
+            @media (max-width: 430px) {
+                top: 96%;
+            }
+            @media (max-width: 390px) {
+                top: 95%;
+            }
+            @media (max-width: 360px) {
+                top: 94%;
+            }
             &--hide {
                 height: 0;
             }
@@ -309,6 +328,9 @@ export default {
             font-size: 3rem;
             z-index: 1;
             user-select: none;
+            @media (max-width: 430px) {
+                bottom: -45px;
+            }
             &:hover {
                 transform: translateY(5px);
             }
