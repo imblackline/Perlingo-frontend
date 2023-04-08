@@ -43,7 +43,7 @@
                 @click="showCard(card._id)"
             >
                 <div class="cardlist__list__card__text">
-                    {{ card.text }}
+                    {{ card.text.charAt(0).toUpperCase() + card.text.slice(1) }}
                 </div>
                 <div
                     class="cardlist__list__card__difficulty"
@@ -61,7 +61,7 @@
 <script>
 import { ref } from "@vue/reactivity";
 import { useStore } from "vuex";
-import {useRouter} from "vue-router"
+import { useRouter } from "vue-router";
 export default {
     setup() {
         const store = useStore();
@@ -103,9 +103,9 @@ export default {
                 return "#ad4dff";
             }
         };
-        const showCard = (cardId)=>{
-            router.push(`/${cardId}`)
-        }
+        const showCard = (cardId) => {
+            router.push(`/${cardId}`);
+        };
         return {
             sortType,
             sortByDate,
@@ -172,12 +172,12 @@ export default {
             &:hover {
                 background-color: #1f7267;
             }
-            &:hover &{
-                &__difficulty{
+            &:hover & {
+                &__difficulty {
                     opacity: 1;
                 }
             }
-            &__difficulty{
+            &__difficulty {
                 display: flex;
                 align-items: center;
                 justify-content: center;

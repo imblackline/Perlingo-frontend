@@ -1,7 +1,14 @@
 <template>
     <div class="container">
         <div class="card" @click="showTranslation = !showTranslation">
-            <div class="card__text">{{ showedCard?.text ? showedCard?.text : "Not Found!" }}</div>
+            <div class="card__text">
+                {{
+                    showedCard?.text
+                        ? showedCard.text.charAt(0).toUpperCase() +
+                          showedCard.text.slice(1)
+                        : "Not Found!"
+                }}
+            </div>
             <div class="card__pronunciation">
                 {{ showedCard?.phonetic ? showedCard?.phonetic : "N/A" }}
             </div>
@@ -20,7 +27,7 @@
                         refresh
                     </span>
                 </div>
-                <div class="card__buttons__button" @click.stop>
+                <div class="card__buttons__button" @click.stop="passCard">
                     Pass
                     <span
                         class="material-icons-round card__buttons__button__icon"
@@ -42,15 +49,33 @@
                 keyboard_arrow_down
             </span>
         </div>
-        <div class="card__detail" :class="{ 'card__detail--show': showDetail }" v-if="showedCard.meanings.length">
-            <div class="card__detail__meanings"  v-for="meaning in showedCard?.meanings" :key="meaning">
-                <div class="card__detail__meanings__phonetic">{{meaning.partOfSpeech}}</div>
-                <div class="card__detail__meanings__definitions" v-for="definition in meaning.definitions" :key="definition">
-                    {{definition.definition}}
+        <div
+            class="card__detail"
+            :class="{ 'card__detail--show': showDetail }"
+            v-if="showedCard.meanings.length"
+        >
+            <div
+                class="card__detail__meanings"
+                v-for="meaning in showedCard?.meanings"
+                :key="meaning"
+            >
+                <div class="card__detail__meanings__phonetic">
+                    {{ meaning.partOfSpeech }}
+                </div>
+                <div
+                    class="card__detail__meanings__definitions"
+                    v-for="definition in meaning.definitions"
+                    :key="definition"
+                >
+                    {{ definition.definition }}
                 </div>
             </div>
         </div>
-        <div class="card__detail" :class="{ 'card__detail--show': showDetail }" v-else> 
+        <div
+            class="card__detail"
+            :class="{ 'card__detail--show': showDetail }"
+            v-else
+        >
             <b>Oops there is no detail</b>
         </div>
     </div>
@@ -96,7 +121,23 @@ export default {
                 return getCardById(route.params.cardId);
             }
         });
-        return { showTranslation, showDetail, showedCard };
+        const passCard = () => {
+            axios
+                .patch(`${store.state.BASE_URL}/cards/${showedCard.value._id}`, [
+                    {
+                        propName: "status",
+                        value: "readed",
+                    },
+                ])
+                .then((res) => {
+                    // console.log(res);
+                    return res;
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        };
+        return { showTranslation, showDetail, showedCard, passCard };
     },
 };
 </script>
@@ -233,7 +274,7 @@ export default {
             opacity: 1;
             transition: max-height 0.5s, padding 0.3s 0s;
         }
-        &__meanings{
+        &__meanings {
             display: flex;
             width: 100%;
             flex-direction: column;
@@ -247,13 +288,13 @@ export default {
                 color: #88a47c;
                 margin-bottom: 10px;
             }
-            &__definitions{
+            &__definitions {
                 text-align: left;
                 border-bottom: 2px dashed #88a47c7b;
                 padding-bottom: 10px;
                 margin-bottom: 10px;
                 width: 100%;
-                &:last-of-type{
+                &:last-of-type {
                     border: none;
                 }
             }
