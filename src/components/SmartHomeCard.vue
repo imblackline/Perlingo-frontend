@@ -52,7 +52,7 @@
                 >
             </div>
         </div>
-        <router-view></router-view>
+        <router-view @getAllCards="getAllCards"></router-view>
     </div>
 </template>
 
@@ -85,12 +85,12 @@ export default {
                 });
             }
         });
-        const getAllCards = () => {
-            axios
+        const getAllCards = async () => {
+            await axios
                 .get(`${store.state.BASE_URL}/cards`)
                 .then((res) => {
                     console.log(res);
-                    store.commit("UPDATE_ALLCARDS", res.data);
+                    store.commit("SAVE_ALLCARDS", res.data);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -105,15 +105,20 @@ export default {
             ),
         );
         const showRandomCard = () => {
-            router.push(
-                `/${
-                    needPracticeCards.value[
-                        Math.floor(
-                            Math.random() * needPracticeCards.value.length,
-                        )
-                    ]._id
-                }`,
-            );
+            if(needPracticeCards.value.length>0){
+                router.push(
+                    `/${
+                        needPracticeCards.value[
+                            Math.floor(
+                                Math.random() * needPracticeCards.value.length,
+                            )
+                        ]._id
+                    }`,
+                );
+            }
+            else {
+                router.push("/nocard")
+            }
             selectedTab.value = "practice";
         };
         const gotoAllCards = () => {
@@ -166,6 +171,7 @@ export default {
             pasteClipboard,
             needPracticeCards,
             addNewCar,
+            getAllCards
         };
     },
 };

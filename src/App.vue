@@ -12,10 +12,12 @@ export default {
     },
     setup() {
         const store = useStore();
-        store.commit(
-            "UPDATE_ALLCARDS",
-            JSON.parse(localStorage.getItem("cards")),
-        );
+        if(JSON.parse(localStorage.getItem("cards"))){
+            store.commit(
+                "SAVE_ALLCARDS",
+                JSON.parse(localStorage.getItem("cards")),
+            );
+        }
     },
 };
 </script>

@@ -4,7 +4,10 @@
             <div class="card__blur" @click.stop v-show="isLoadingPass">
                 <SVGLoading class="card__blur__loading" />
             </div>
-            <div class="card__text">
+            <div class="card__text" v-if="currentRoute === '/nocard'">
+                No cards left
+            </div>
+            <div class="card__text" v-else>
                 {{
                     showedCard?.text
                         ? showedCard.text.charAt(0).toUpperCase() +
@@ -22,7 +25,23 @@
                 {{ showedCard?.translation }}
             </div>
             <div class="card__buttons">
-                <div class="card__buttons__button" @click.stop="againCard">
+                <div
+                    class="card__buttons__onebutton"
+                    v-show="currentRoute === '/nocard'"
+                    @click.stop="againAllCards"
+                >
+                    Practice All cards Again
+                    <span
+                        class="material-icons-round card__buttons__button__icon"
+                    >
+                        refresh
+                    </span>
+                </div>
+                <div
+                    class="card__buttons__button"
+                    @click.stop="againCard"
+                    v-show="currentRoute !== '/nocard'"
+                >
                     Again
                     <span
                         class="material-icons-round card__buttons__button__icon"
@@ -30,7 +49,11 @@
                         refresh
                     </span>
                 </div>
-                <div class="card__buttons__button" @click.stop="passCard">
+                <div
+                    class="card__buttons__button"
+                    @click.stop="passCard"
+                    v-show="currentRoute !== '/nocard'"
+                >
                     Pass
                     <span
                         class="material-icons-round card__buttons__button__icon"
@@ -43,11 +66,13 @@
                 class="card__drop"
                 :class="{ 'card__drop--hide': showDetail }"
                 @click.stop="showDetail = !showDetail"
+                v-if="currentRoute !== '/nocard'"
             />
             <span
                 class="material-icons-round card__dropicon"
                 :class="{ 'card__dropicon--open': showDetail }"
                 @click.stop="showDetail = !showDetail"
+                v-if="currentRoute !== '/nocard'"
             >
                 keyboard_arrow_down
             </span>
@@ -55,7 +80,7 @@
         <div
             class="card__detail"
             :class="{ 'card__detail--show': showDetail }"
-            v-if="showedCard.meanings.length"
+            v-if="showedCard?.meanings.length"
         >
             <div
                 class="card__detail__meanings"
@@ -88,7 +113,7 @@
 import SVGDrop from "@/components/SVG/drop.vue";
 import SVGLoading from "@/components/SVG/loading.vue";
 import { ref } from "@vue/reactivity";
-import { computed } from "@vue/runtime-core";
+import { computed, nextTick, onMounted } from "@vue/runtime-core";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import axios from "axios";
@@ -96,7 +121,8 @@ import router from "../router";
 
 export default {
     components: { SVGDrop, SVGLoading },
-    setup() {
+    emits: ["getAllCards"],
+    setup(_, { emit }) {
         const route = useRoute();
         const store = useStore();
 
@@ -119,6 +145,24 @@ export default {
                 (card) => card.status === "need Practice",
             ),
         );
+        const currentRoute = computed(() => route.path);
+
+        onMounted(() => {
+            if (
+                currentRoute.value === "/nocard" &&
+                needPracticeCards.value.length > 0
+            ) {
+                router.push(
+                    `/${
+                        needPracticeCards.value[
+                            Math.floor(
+                                Math.random() * needPracticeCards.value.length,
+                            )
+                        ]._id
+                    }`,
+                );
+            }
+        });
         const showedCard = computed(() => {
             if (
                 store.state.Allcards &&
@@ -135,6 +179,7 @@ export default {
         });
         const passCard = () => {
             isLoadingPass.value = true;
+            showTranslation.value = false;
             axios
                 .patch(
                     `${store.state.BASE_URL}/cards/${showedCard.value._id}`,
@@ -149,6 +194,44 @@ export default {
                     store.state.Allcards.find(
                         (card) => card._id === res.data._id,
                     ).status = "readed";
+                    if (needPracticeCards.value.length > 0) {
+                        router.push(
+                            `/${
+                                needPracticeCards.value[
+                                    Math.floor(
+                                        Math.random() *
+                                            needPracticeCards.value.length,
+                                    )
+                                ]._id
+                            }`,
+                        );
+                    } else {
+                        router.push("/nocard");
+                    }
+                    isLoadingPass.value = false;
+                })
+                .catch((err) => {
+                    isLoadingPass.value = false;
+                    console.log(err);
+                });
+        };
+        const againCard = () => {
+            isLoadingPass.value = true;
+            showTranslation.value = false;
+            axios
+                .patch(
+                    `${store.state.BASE_URL}/cards/${showedCard.value._id}`,
+                    [
+                        {
+                            propName: "status",
+                            value: "need Practice",
+                        },
+                    ],
+                )
+                .then((res) => {
+                    store.state.Allcards.find(
+                        (card) => card._id === res.data._id,
+                    ).status = "need Practice";
                     router.push(
                         `/${
                             needPracticeCards.value[
@@ -166,19 +249,14 @@ export default {
                     console.log(err);
                 });
         };
-        const againCard = () => {
+        const againAllCards = () => {
             isLoadingPass.value = true;
             axios
-                .patch(
-                    `${store.state.BASE_URL}/cards/${showedCard.value._id}`,
-                    [
-                        {
-                            propName: "status",
-                            value: "need Practice",
-                        },
-                    ],
-                )
+                .patch(`${store.state.BASE_URL}/cards/againAll`)
                 .then((res) => {
+                    showTranslation.value = false;
+                    store.commit('UPDATE_ALLCARDS');
+                    console.log(store.state.Allcards);
                     router.push(
                         `/${
                             needPracticeCards.value[
@@ -203,6 +281,8 @@ export default {
             passCard,
             isLoadingPass,
             againCard,
+            currentRoute,
+            againAllCards,
         };
     },
 };
@@ -268,6 +348,23 @@ export default {
             position: absolute;
             bottom: 20px;
             justify-content: space-between;
+            &__onebutton {
+                background: #2e4f4f;
+                box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.25);
+                border-radius: 12px;
+                color: #e6e2c3;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 15px;
+                width: 100%;
+                font-size: 1.3rem;
+                transition: 0.3s;
+                user-select: none;
+                &:hover {
+                    font-size: 1.4rem;
+                }
+            }
             &__button {
                 background: #2e4f4f;
                 box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.25);

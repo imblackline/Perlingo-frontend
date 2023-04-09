@@ -8,6 +8,11 @@ const routes = [
         component: SmartCard,
     },
     {
+        path: "nocard",
+        name: "noCard",
+        component: SmartCard,
+    },
+    {
         path: "cardlist",
         name: "cardlist",
         component: SmartCardsList,

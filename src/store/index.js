@@ -6,9 +6,13 @@ export default createStore({
         Allcards: [],
     },
     mutations: {
-        UPDATE_ALLCARDS(state, cards) {
+        SAVE_ALLCARDS(state, cards) {
             localStorage.setItem("cards", JSON.stringify(cards));
             state.Allcards = cards;
+        },
+        UPDATE_ALLCARDS(state) {
+            state.Allcards.forEach((card) => (card.status = "need Practice"));
+            // localStorage.setItem("cards", JSON.stringify(state.Allcards));
         },
         SORT_CARDS(state, type) {
             if (type === "alphabet") {
