@@ -1,6 +1,15 @@
 <template>
     <div class="container">
         <div class="card" @click="showTranslation = !showTranslation">
+            <div class="card__topicon">
+                <span
+                    class="material-icons card__topicon__icon"
+                    @click.stop="removeCard"
+                >
+                    delete
+                </span>
+                <span class="material-icons card__topicon__icon"> edit </span>
+            </div>
             <div class="card__blur" @click.stop v-show="isLoadingPass">
                 <SVGLoading class="card__blur__loading" />
             </div>
@@ -255,8 +264,33 @@ export default {
                 .patch(`${store.state.BASE_URL}/cards/againAll`)
                 .then((res) => {
                     showTranslation.value = false;
-                    store.commit('UPDATE_ALLCARDS');
+                    store.commit("UPDATE_ALLCARDS");
                     console.log(store.state.Allcards);
+                    router.push(
+                        `/${
+                            needPracticeCards.value[
+                                Math.floor(
+                                    Math.random() *
+                                        needPracticeCards.value.length,
+                                )
+                            ]._id
+                        }`,
+                    );
+                    isLoadingPass.value = false;
+                })
+                .catch((err) => {
+                    isLoadingPass.value = false;
+                    console.log(err);
+                });
+        };
+        const removeCard = () => {
+            isLoadingPass.value = true;
+            axios
+                .delete(`${store.state.BASE_URL}/cards/${showedCard.value._id}`)
+                .then((res) => {
+                    showTranslation.value = false;
+                    console.log(store.state.Allcards);
+                    store.commit("DELETE_CARD",showedCard.value._id)
                     router.push(
                         `/${
                             needPracticeCards.value[
@@ -283,6 +317,7 @@ export default {
             againCard,
             currentRoute,
             againAllCards,
+            removeCard
         };
     },
 };
@@ -304,6 +339,24 @@ export default {
         cursor: pointer;
         box-shadow: 0px 0px 21px 6px rgba(44, 51, 51, 0.25);
         position: relative;
+        &__topicon {
+            position: absolute;
+            width: 90%;
+            display: flex;
+            top: 20px;
+            justify-content: space-between;
+            &__icon {
+                font-size: 1.9rem;
+                color: #2e4f4f;
+                transition: 0.3s;
+                padding: 5px;
+                user-select: none;
+                border-radius: 50px;
+                &:hover {
+                    background-color: #88a47c74;
+                }
+            }
+        }
         &__blur {
             position: absolute;
             width: 99%;

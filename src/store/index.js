@@ -12,7 +12,10 @@ export default createStore({
         },
         UPDATE_ALLCARDS(state) {
             state.Allcards.forEach((card) => (card.status = "need Practice"));
-            // localStorage.setItem("cards", JSON.stringify(state.Allcards));
+            localStorage.setItem("cards", JSON.stringify(state.Allcards));
+        },
+        DELETE_CARD(state, cardId) {
+            state.Allcards = state.Allcards.filter((card) => card._id !== cardId);
         },
         SORT_CARDS(state, type) {
             if (type === "alphabet") {
