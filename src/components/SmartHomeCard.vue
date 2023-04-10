@@ -181,10 +181,7 @@ export default {
 .homeCard__container {
     width: 70%;
     height: 100%;
-    padding-bottom: 105px;
-    overflow-x: auto;
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    
     @media (max-width: 700px) {
         width: 75%;
     }
@@ -194,9 +191,7 @@ export default {
     @media (max-width: 450px) {
         width: 90%;
     }
-    &::-webkit-scrollbar {
-        display: none;
-    }
+    
 
     .homeCard__addbutton {
         width: 100%;

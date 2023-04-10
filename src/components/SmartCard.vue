@@ -1,14 +1,71 @@
 <template>
     <div class="container">
-        <div class="card" @click="showTranslation = !showTranslation">
+        <div class="card" >
             <div class="card__topicon">
-                <span
-                    class="material-icons card__topicon__icon"
-                    @click.stop="removeCard"
+                <div class="card__topicon__row" v-show="!showDifficultySelect">
+                    <span
+                        class="material-icons card__topicon__row__icon"
+                        @click.stop="removeCard"
+                    >
+                        delete
+                    </span>
+                    <div
+                        class="card__topicon__row__difficulty"
+                        :style="{
+                            'background-color': difficultyColor(
+                                showedCard?.difficulty,
+                            ),
+                        }"
+                        @click.stop="showDifficultySelect = true"
+                    >
+                        {{ showedCard?.difficulty }}
+                    </div>
+                    <span class="material-icons card__topicon__row__icon">
+                        edit
+                    </span>
+                </div>
+                <div
+                    class="card__topicon__row second__row"
+                    :class="{ 'second__row--show': showDifficultySelect }"
+                    v-click-outside="hideDifficultySelect"
                 >
-                    delete
-                </span>
-                <span class="material-icons card__topicon__icon"> edit </span>
+                    <div
+                        class="card__topicon__row__difficulty"
+                        :style="{
+                            'background-color': difficultyColor('easy'),
+                        }"
+                        @click.stop="changeDifficulty('easy')"
+                    >
+                        easy
+                    </div>
+                    <div
+                        class="card__topicon__row__difficulty"
+                        :style="{
+                            'background-color': difficultyColor('tricky'),
+                        }"
+                        @click.stop="changeDifficulty('tricky')"
+                    >
+                        tricky
+                    </div>
+                    <div
+                        class="card__topicon__row__difficulty"
+                        :style="{
+                            'background-color': difficultyColor('hard'),
+                        }"
+                        @click.stop="changeDifficulty('hard')"
+                    >
+                        hard
+                    </div>
+                    <div
+                        class="card__topicon__row__difficulty"
+                        :style="{
+                            'background-color': difficultyColor('super'),
+                        }"
+                        @click.stop="changeDifficulty('super')"
+                    >
+                        super
+                    </div>
+                </div>
             </div>
             <div class="card__blur" @click.stop v-show="isLoadingPass">
                 <SVGLoading class="card__blur__loading" />
@@ -30,6 +87,7 @@
             <div
                 class="card__translation"
                 :class="{ 'card__translation--show': showTranslation }"
+                @click="showTranslation = !showTranslation"
             >
                 {{ showedCard?.translation }}
             </div>
@@ -137,6 +195,7 @@ export default {
 
         const showTranslation = ref(false);
         const showDetail = ref(false);
+        const showDifficultySelect = ref(false);
         const isLoadingPass = ref(false);
         const getCardById = (id) => {
             axios
@@ -148,6 +207,20 @@ export default {
                 .catch((err) => {
                     console.log(err);
                 });
+        };
+        const hideDifficultySelect = () => {
+            showDifficultySelect.value = false;
+        };
+        const difficultyColor = (difficulty) => {
+            if (difficulty === "easy") {
+                return "#72bf44";
+            } else if (difficulty === "tricky") {
+                return "#f7a233";
+            } else if (difficulty === "hard") {
+                return "#d64242";
+            } else if (difficulty === "super") {
+                return "#ad4dff";
+            }
         };
         const needPracticeCards = computed(() =>
             store.state.Allcards.filter(
@@ -290,7 +363,7 @@ export default {
                 .then((res) => {
                     showTranslation.value = false;
                     console.log(store.state.Allcards);
-                    store.commit("DELETE_CARD",showedCard.value._id)
+                    store.commit("DELETE_CARD", showedCard.value._id);
                     router.push(
                         `/${
                             needPracticeCards.value[
@@ -308,6 +381,31 @@ export default {
                     console.log(err);
                 });
         };
+        const changeDifficulty = (newDifficulty) => {
+            isLoadingPass.value = true;
+            axios
+                .patch(
+                    `${store.state.BASE_URL}/cards/${showedCard.value._id}`,
+                    [
+                        {
+                            propName: "difficulty",
+                            value: newDifficulty,
+                        },
+                    ],
+                )
+                .then((res) => {
+                    store.state.Allcards.find(
+                        (card) => card._id === res.data._id,
+                    ).difficulty = newDifficulty;
+                    isLoadingPass.value = false;
+                    showDifficultySelect.value = false;
+                })
+                .catch((err) => {
+                    isLoadingPass.value = false;
+                    showDifficultySelect.value = false;
+                    console.log(err);
+                });
+        };
         return {
             showTranslation,
             showDetail,
@@ -317,7 +415,11 @@ export default {
             againCard,
             currentRoute,
             againAllCards,
-            removeCard
+            removeCard,
+            difficultyColor,
+            showDifficultySelect,
+            hideDifficultySelect,
+            changeDifficulty
         };
     },
 };
@@ -325,7 +427,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-    // width: 100%;
+    width: 100%;
     .card {
         width: 100%;
         aspect-ratio: 1/1;
@@ -336,24 +438,63 @@ export default {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
         box-shadow: 0px 0px 21px 6px rgba(44, 51, 51, 0.25);
         position: relative;
         &__topicon {
             position: absolute;
             width: 90%;
             display: flex;
+            flex-direction: column;
             top: 20px;
-            justify-content: space-between;
-            &__icon {
-                font-size: 1.9rem;
-                color: #2e4f4f;
+            align-items: center;
+            &__row {
+                // margin-bottom: 25px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                &__difficulty {
+                    height: fit-content;
+                    padding: 1px 30px;
+                    opacity: 0.7;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+                &__icon {
+                    cursor: pointer;
+                    font-size: 1.9rem;
+                    color: #2e4f4f;
+                    transition: 0.3s;
+                    padding: 5px;
+                    user-select: none;
+                    border-radius: 50px;
+                    &:hover {
+                        background-color: #88a47c74;
+                    }
+                }
+            }
+            .second__row {
+                margin-top: 10px;
+                width: 0;
                 transition: 0.3s;
-                padding: 5px;
-                user-select: none;
-                border-radius: 50px;
-                &:hover {
-                    background-color: #88a47c74;
+                visibility: hidden;
+                transform: translateX(-140px) translateY(10px);
+                opacity: 0;
+                margin-top: -40px;
+                &--show {
+                    margin-top: 0;
+                    transform: none;
+                    visibility: visible;
+                    opacity: 1;
+                    width: 100%;
+                }
+                .card__topicon__row__difficulty {
+                    padding: 1px 20px;
+                    transition: 0.3s;
+                    &:hover {
+                        padding: 1px 30px;
+                    }
                 }
             }
         }
@@ -385,6 +526,7 @@ export default {
             color: #e6e2c3;
             font-weight: bold;
             font-size: 2rem;
+            cursor: pointer;
             margin-top: 30px;
             color: transparent;
             text-shadow: 0 0 19px #e6e2c3;
@@ -413,6 +555,7 @@ export default {
                 width: 100%;
                 font-size: 1.3rem;
                 transition: 0.3s;
+                cursor: pointer;
                 user-select: none;
                 &:hover {
                     font-size: 1.4rem;
@@ -430,6 +573,7 @@ export default {
                 font-size: 1.3rem;
                 transition: 0.3s;
                 user-select: none;
+                cursor: pointer;
                 @media (max-width: 500px) {
                     padding: 7px 40px;
                     font-size: 1.1rem;
@@ -446,6 +590,7 @@ export default {
             position: absolute;
             // top: auto;
             // bottom: -68px;
+            cursor: pointer;
             top: 98.5%;
             transition: 0.5s;
             width: 95%;
@@ -477,6 +622,7 @@ export default {
             bottom: -50px;
             font-size: 3rem;
             z-index: 1;
+            cursor: pointer;
             user-select: none;
             @media (max-width: 430px) {
                 bottom: -45px;
