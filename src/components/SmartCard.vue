@@ -531,6 +531,7 @@ export default {
             color: transparent;
             text-shadow: 0 0 19px #e6e2c3;
             transition: 0.3s;
+            padding: 3px 15px;
             &--show {
                 color: #e6e2c3;
                 text-shadow: none;

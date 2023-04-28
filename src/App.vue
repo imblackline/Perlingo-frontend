@@ -18,6 +18,12 @@ export default {
                 JSON.parse(localStorage.getItem("cards")),
             );
         }
+        if(JSON.parse(localStorage.getItem("me"))){
+            store.commit(
+                "UPDATE_ME",
+                JSON.parse(localStorage.getItem("me")),
+            );
+        }
     },
 };
 </script>

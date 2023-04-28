@@ -4,6 +4,7 @@ export default createStore({
     state: {
         BASE_URL: "http://localhost:3000",
         Allcards: [],
+        me:{}
     },
     mutations: {
         SAVE_ALLCARDS(state, cards) {
@@ -13,6 +14,10 @@ export default createStore({
         UPDATE_ALLCARDS(state) {
             state.Allcards.forEach((card) => (card.status = "need Practice"));
             localStorage.setItem("cards", JSON.stringify(state.Allcards));
+        },
+        UPDATE_ME(state,newMe) {
+            state.me = newMe
+            localStorage.setItem("me", JSON.stringify(state.me));
         },
         DELETE_CARD(state, cardId) {
             state.Allcards = state.Allcards.filter((card) => card._id !== cardId);
