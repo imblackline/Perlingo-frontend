@@ -87,9 +87,9 @@ export default {
                         error.show = false;
                         error.text = undefined;
                         console.log(res);
-                        store.commit("UPDATE_ME", { toke: res.data.token });
+                        store.commit("UPDATE_ME", { token: res.data.token });
                         loginLoading.value = false;
-                        router.push("/")
+                        router.push("/cardlist")
                     })
                     .catch((err) => {
                         console.log(err);

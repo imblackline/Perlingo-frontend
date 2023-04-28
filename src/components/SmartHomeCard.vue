@@ -87,7 +87,11 @@ export default {
         });
         const getAllCards = async () => {
             await axios
-                .get(`${store.state.BASE_URL}/cards`)
+                .get(`${store.state.BASE_URL}/cards`, {
+                    headers: {
+                        Authorization: `Bearer ${store.state.me.token}`,
+                    },
+                })
                 .then((res) => {
                     console.log(res);
                     store.commit("SAVE_ALLCARDS", res.data);
@@ -105,7 +109,7 @@ export default {
             ),
         );
         const showRandomCard = () => {
-            if(needPracticeCards.value.length>0){
+            if (needPracticeCards.value.length > 0) {
                 router.push(
                     `/${
                         needPracticeCards.value[
@@ -115,9 +119,8 @@ export default {
                         ]._id
                     }`,
                 );
-            }
-            else {
-                router.push("/nocard")
+            } else {
+                router.push("/nocard");
             }
             selectedTab.value = "practice";
         };
@@ -171,7 +174,7 @@ export default {
             pasteClipboard,
             needPracticeCards,
             addNewCar,
-            getAllCards
+            getAllCards,
         };
     },
 };
@@ -181,7 +184,7 @@ export default {
 .homeCard__container {
     width: 70%;
     height: 100%;
-    
+
     @media (max-width: 700px) {
         width: 75%;
     }
@@ -191,7 +194,6 @@ export default {
     @media (max-width: 450px) {
         width: 90%;
     }
-    
 
     .homeCard__addbutton {
         width: 100%;
